@@ -13,7 +13,6 @@ import java.util.Optional;
 
 
 @RestController
-//@RequestMapping()
 @RequiredArgsConstructor
 public class HitController {
 
@@ -28,7 +27,11 @@ public class HitController {
     }
 
     @GetMapping(path = "/stats")
-    public List<StatsDto> getStats(@RequestParam @DateTimeFormat(pattern = DATE_TIME_FORMAT) LocalDateTime start, @RequestParam @DateTimeFormat(pattern = DATE_TIME_FORMAT) LocalDateTime end, @RequestParam Optional<List<String>> uris, @RequestParam(defaultValue = "false") Boolean unique) {
+    public List<StatsDto> getStats(@RequestParam @DateTimeFormat(pattern = DATE_TIME_FORMAT) LocalDateTime start,
+                                   @RequestParam @DateTimeFormat(pattern = DATE_TIME_FORMAT) LocalDateTime end,
+                                   @RequestParam Optional<List<String>> uris,
+                                   @RequestParam(defaultValue = "false") Boolean unique) {
         return hitService.getStats(start, end, uris, unique);
     }
+
 }

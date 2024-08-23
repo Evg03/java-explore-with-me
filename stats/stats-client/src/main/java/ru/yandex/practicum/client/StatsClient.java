@@ -36,7 +36,9 @@ public class StatsClient extends BaseClient {
         StringBuilder sb = new StringBuilder();
 
         if (uris != null && !uris.isEmpty()) {
-            if (sb.isEmpty()) sb.insert(0,"?");
+            if (sb.isEmpty()) {
+                sb.insert(0,"?");
+            }
             for (int i = 0; i < uris.size(); i++) {
                 String uri = uris.get(i);
                 if (i != 0) {
@@ -46,9 +48,14 @@ public class StatsClient extends BaseClient {
                 sb.append(uri);
             }
         }
-        if (sb.isEmpty()) sb.insert(0,"?");
-        else sb.append("&");
-        if (unique) sb.append("unique=true");
+        if (sb.isEmpty()) {
+            sb.insert(0,"?");
+        } else {
+            sb.append("&");
+        }
+        if (unique) {
+            sb.append("unique=true");
+        }
         String path = URLEncoder.encode(sb.toString(), StandardCharsets.UTF_8);
         return get(path);
     }

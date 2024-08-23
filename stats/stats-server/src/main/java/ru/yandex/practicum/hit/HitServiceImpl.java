@@ -1,5 +1,6 @@
 package ru.yandex.practicum.hit;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ public class HitServiceImpl implements HitService {
     private final HitRepository hitRepository;
 
     @Override
+    @Transactional
     public void createHit(HitDto hitDto) {
         Hit map = new ModelMapper().map(hitDto, Hit.class);
         hitRepository.save(map);
@@ -24,12 +26,18 @@ public class HitServiceImpl implements HitService {
 
     @Override
     public List<StatsDto> getStats(LocalDateTime start, LocalDateTime end, Optional<List<String>> uris, Boolean unique) {
-        if (uris.isPresent()) {
-            if (unique) return hitRepository.getStatsByUrisByUniqueIp(start, end, uris.get());
-            else return hitRepository.getStatsByUris(start, end, uris.get());
+        if (uris.isPresent() && !uris.get().isEmpty()) {
+            if (unique) {
+                return hitRepository.getStatsByUrisByUniqueIp(start, end, uris.get());
+            } else {
+                return hitRepository.getStatsByUris(start, end, uris.get());
+            }
         }
-        if (unique) return hitRepository.getAllStatsByUniqueIp(start, end);
-        else return hitRepository.getAllStats(start, end);
+        if (unique) {
+            return hitRepository.getAllStatsByUniqueIp(start, end);
+        } else {
+            return hitRepository.getAllStats(start, end);
+        }
     }
 
 }

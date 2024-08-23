@@ -12,6 +12,4 @@ public interface HitService {
     void createHit(HitDto hitDto);
 
     List<StatsDto> getStats(LocalDateTime start, LocalDateTime end, Optional<List<String>> uris, Boolean unique);
-
-
 }
