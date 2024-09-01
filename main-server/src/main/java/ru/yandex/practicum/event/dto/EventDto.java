@@ -1,8 +1,12 @@
 package ru.yandex.practicum.event.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import ru.yandex.practicum.event.model.Location;
+import ru.yandex.practicum.event.model.State;
 import ru.yandex.practicum.user.dto.UserShortDto;
 
 import java.time.LocalDateTime;
@@ -10,20 +14,24 @@ import java.time.LocalDateTime;
 @Data
 @RequiredArgsConstructor
 public class EventDto {
-    private final Integer id;
-    private final String annotation;
-    private final Integer category;
-    private final Integer confirmedRequests;
-    private final LocalDateTime createdOn;
-    private final String description;
-    private final LocalDateTime eventDate;
-    private final UserShortDto initiator;
-    private final Location location;
-    private final Boolean paid;
-    private final Integer participantLimit;
-    private final LocalDateTime publishedOn;
-    private final Boolean requestModeration;
-    private final String state;
-    private final String title;
-    private final Integer views;
+    private Integer id;
+    private String annotation;
+    private Integer category;
+    private Integer confirmedRequests = 0;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime createdOn;
+    private String description;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime eventDate;
+    private UserShortDto initiator;
+    private Location location;
+    private Boolean paid;
+    private Integer participantLimit;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime publishedOn;
+    private Boolean requestModeration;
+    @Enumerated(EnumType.STRING)
+    private State state;
+    private String title;
+    private Integer views = 0;
 }

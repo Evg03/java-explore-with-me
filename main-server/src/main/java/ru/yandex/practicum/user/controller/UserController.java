@@ -1,5 +1,6 @@
 package ru.yandex.practicum.user.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -18,12 +19,12 @@ public class UserController {
 
     @PostMapping(path = "/admin/users")
     @ResponseStatus(HttpStatus.CREATED)
-    public UserDto createUser(@RequestBody NewUserRequest newUserRequest) {
+    public UserDto createUser(@Valid @RequestBody NewUserRequest newUserRequest) {
         return userService.createUser(newUserRequest);
     }
 
     @GetMapping(path = "/admin/users")
-    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseStatus(HttpStatus.OK)
     public List<UserDto> getUsers(@RequestParam Optional<List<Integer>> ids,
                                   @RequestParam(defaultValue = "0") Integer from,
                                   @RequestParam(defaultValue = "10") Integer size) {

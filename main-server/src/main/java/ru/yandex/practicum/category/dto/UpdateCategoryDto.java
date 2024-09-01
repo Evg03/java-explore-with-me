@@ -10,5 +10,5 @@ import lombok.RequiredArgsConstructor;
 public class UpdateCategoryDto {
     @NotBlank
     @Size(min = 1, max = 50)
-    private final String name;
+    private String name;
 }

@@ -1,5 +1,6 @@
 package ru.yandex.practicum.category.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +19,7 @@ public class CategoryController {
 
     @PostMapping(path = "/admin/categories")
     @ResponseStatus(HttpStatus.CREATED)
-    public CategoryDto createCategory(@RequestBody NewCategoryDto newCategoryDto) {
+    public CategoryDto createCategory(@Valid @RequestBody NewCategoryDto newCategoryDto) {
         return categoryService.createCategory(newCategoryDto);
     }
 
@@ -30,13 +31,15 @@ public class CategoryController {
 
     @PatchMapping(path = "/admin/categories/{catId}")
     @ResponseStatus(HttpStatus.OK)
-    public CategoryDto deleteCategory(@PathVariable int catId, @RequestBody UpdateCategoryDto updateCategoryDto) {
+    public CategoryDto updateCategory(@PathVariable int catId,
+                                      @Valid @RequestBody UpdateCategoryDto updateCategoryDto) {
         return categoryService.updateCategory(catId, updateCategoryDto);
     }
 
     @GetMapping(path = "/categories")
     @ResponseStatus(HttpStatus.OK)
-    public List<CategoryDto> getCategories(@RequestParam int from, @RequestParam int size) {
+    public List<CategoryDto> getCategories(@RequestParam(defaultValue = "0") int from,
+                                           @RequestParam(defaultValue = "10") int size) {
         return categoryService.getCategories(from, size);
     }
 

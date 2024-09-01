@@ -1,23 +1,22 @@
 package ru.yandex.practicum.request.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import ru.yandex.practicum.request.model.Status;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @RequiredArgsConstructor
-public class ParticipationRequestDto {
-    private Integer id;
-    private Integer event;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime created;
-    private Integer requester;
+public class UpdateStatusRequestDto {
+    @NotEmpty
+    @NotNull
+    private List<Integer> requestIds;
+    @NotNull
     @Enumerated(EnumType.STRING)
     private Status status;
-
 }

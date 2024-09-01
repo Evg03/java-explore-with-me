@@ -9,10 +9,12 @@ import java.util.List;
 
 public interface CategoryRepository extends JpaRepository<Category, Integer> {
 
-    @Query("SELECT new ru.yandex.practicum.category.dto.CategoryDto(cat.id, cat.name) " +
+   /* @Query("SELECT new ru.yandex.practicum.category.dto.CategoryDto(cat.id, cat.name) " +
             "FROM Category AS cat " +
             "ORDER BY cat.name " +
             "OFFSET :offset " +
-            "LIMIT :size")
-    public List<CategoryDto> findWithOffsetAndLimit(int offset, int limit);
+            "LIMIT :lim")
+    public List<CategoryDto> findWithOffsetAndLimit(int offset, long lim);*/
+    @Query(name = "category_native_query_dto", nativeQuery = true)
+    public List<CategoryDto> findWithOffsetAndLimit(int offset, int size);
 }

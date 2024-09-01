@@ -10,6 +10,6 @@ import ru.yandex.practicum.compilation.storage.CompilationRepository;
 public class CompilationServiceImpl implements CompilationService {
 
     private final CompilationRepository compilationRepository;
-    private final ModelMapper modelMapper;
+    private final ModelMapper modelMapper = new ModelMapper();
 
 }

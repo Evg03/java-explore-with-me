@@ -56,9 +56,11 @@ public class CategoryServiceImpl implements CategoryService {
     public List<CategoryDto> getCategories(int from, int size) {
         //TODO удалить
 //        return categoryRepository.findAll(PageRequest.of(from, size, Sort.by("id"))).stream().map(category -> modelMapper.map(category, CategoryDto.class)).toList();
-        return categoryRepository.findWithOffsetAndLimit(from, size);
-
-
+//        return categoryRepository.findWithOffsetAndLimit(from, size);
+//        return categoryRepository.findWithOffsetAndLimit(from, size);
+        return categoryRepository.findAll(PageRequest.of(from,size, Sort.by("id").ascending())).stream()
+                .map(category -> modelMapper.map(category, CategoryDto.class))
+                .toList();
     }
 
     @Override

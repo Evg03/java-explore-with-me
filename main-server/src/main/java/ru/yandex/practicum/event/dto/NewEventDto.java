@@ -1,8 +1,7 @@
 package ru.yandex.practicum.event.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.*;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.jackson.Jacksonized;
@@ -23,15 +22,18 @@ public class NewEventDto {
     @Size(min = 20, max = 7000)
     private final String description;
     @NotNull
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Future
     private final LocalDateTime eventDate;
     @NotNull
     private final Location location;
     @Builder.Default
     private final Boolean paid = false;
     @Builder.Default
+    @PositiveOrZero
     private final Integer participantLimit = 0;
     @Builder.Default
-    private final Boolean requestModeration = false;
+    private final Boolean requestModeration = true;
     @NotBlank
     @Size(min = 3, max = 120)
     private final String title;
