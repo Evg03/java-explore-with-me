@@ -11,10 +11,11 @@ import ru.yandex.practicum.event.dto.*;
 import ru.yandex.practicum.event.model.*;
 import ru.yandex.practicum.event.storage.EventRepository;
 import ru.yandex.practicum.exception.*;
+import ru.yandex.practicum.request.model.Status;
+import ru.yandex.practicum.request.storage.RequestRepository;
 import ru.yandex.practicum.user.model.User;
 import ru.yandex.practicum.user.storage.UserRepository;
 
-import java.awt.print.Pageable;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -26,6 +27,7 @@ public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
+    private final RequestRepository requestRepository;
     private final ModelMapper modelMapper = new EventMapper();
 
     @Override
@@ -84,7 +86,10 @@ public class EventServiceImpl implements EventService {
             event.setState(State.CANCELED);
         }
         modelMapper.map(updateEventUserRequest, event);
-        return modelMapper.map(eventRepository.save(event), EventDto.class);
+        EventDto eventDto = modelMapper.map(eventRepository.save(event), EventDto.class);
+        long confirmedRequests = requestRepository.countByEventAndStatusLike(eventId, Status.CONFIRMED);
+        eventDto.setConfirmedRequests((int) confirmedRequests);
+        return eventDto;
     }
 
     @Override
@@ -121,7 +126,10 @@ public class EventServiceImpl implements EventService {
             throw new ActionNotAllowedException("Дата начала изменяемого события должна быть " +
                     "не ранее чем за час от даты публикации.");
         }
-        return modelMapper.map(eventRepository.save(event), EventDto.class);
+        EventDto eventDto = modelMapper.map(eventRepository.save(event), EventDto.class);
+        long confirmedRequests = requestRepository.countByEventAndStatusLike(eventId, Status.CONFIRMED);
+        eventDto.setConfirmedRequests((int) confirmedRequests);
+        return eventDto;
     }
 
     @Override
@@ -139,7 +147,10 @@ public class EventServiceImpl implements EventService {
             throw new InvalidOwnerException(String.format("Пользователь с id = %s " +
                     "не является владельцем события с id = %s.", userId, event.getId()));
         }
-        return modelMapper.map(event, EventDto.class);
+        EventDto eventDto = modelMapper.map(event, EventDto.class);
+        long confirmedRequests = requestRepository.countByEventAndStatusLike(eventId, Status.CONFIRMED);
+        eventDto.setConfirmedRequests((int) confirmedRequests);
+        return eventDto;
     }
 
     @Override
@@ -152,6 +163,10 @@ public class EventServiceImpl implements EventService {
                         PageRequest.of(from, size, Sort.by("id").ascending()))
                 .stream()
                 .map(event -> modelMapper.map(event, EventShortDto.class))
+                .peek(eventShortDto -> {
+                    long confirmedRequests = requestRepository.countByEventAndStatusLike(eventShortDto.getId(), Status.CONFIRMED);
+                    eventShortDto.setConfirmedRequests((int) confirmedRequests);
+                })
                 .toList();
     }
 
@@ -172,6 +187,10 @@ public class EventServiceImpl implements EventService {
                 PageRequest.of(from, size, Sort.by("id").ascending()));
         return events.stream()
                 .map(event -> modelMapper.map(event, EventDto.class))
+                .peek(eventDto -> {
+                    long confirmedRequests = requestRepository.countByEventAndStatusLike(eventDto.getId(), Status.CONFIRMED);
+                    eventDto.setConfirmedRequests((int) confirmedRequests);
+                })
                 .toList();
     }
 
@@ -195,6 +214,9 @@ public class EventServiceImpl implements EventService {
             throw new EventNotFoundException(String.format("Опубликованного события с id = %s не найдено.", id));
         }
         Event event = eventOptional.get();
-        return modelMapper.map(event, EventDto.class);
+        EventDto eventDto = modelMapper.map(event, EventDto.class);
+        long confirmedRequests = requestRepository.countByEventAndStatusLike(id, Status.CONFIRMED);
+        eventDto.setConfirmedRequests((int) confirmedRequests);
+        return eventDto;
     }
 }

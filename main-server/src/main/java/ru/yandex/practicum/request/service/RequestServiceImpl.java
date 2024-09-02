@@ -47,11 +47,12 @@ public class RequestServiceImpl implements RequestService {
         if (event.getState() != State.PUBLISHED) {
             throw new ActionNotAllowedException("Нельзя участвовать в неопубликованном событии.");
         }
-        if (event.getParticipantLimit().equals(0)) {
+        long requestsCount = requestRepository.countByEventAndStatusLike(eventId, Status.CONFIRMED);
+        Integer limit = event.getParticipantLimit();
+        if (limit != 0 && limit == requestsCount) {
             throw new ActionNotAllowedException("Достигнут лимит запросов");
         }
-        Status status = event.getRequestModeration()
-                || event.getParticipantLimit().equals(0) ? Status.PENDING : Status.CONFIRMED;
+        Status status = event.getRequestModeration() ? Status.PENDING : Status.CONFIRMED;
         Request request = new Request(null, eventId, LocalDateTime.now(), userId, status);
         Request savedRequest = requestRepository.save(request);
         return modelMapper.map(savedRequest, ParticipationRequestDto.class);
@@ -115,21 +116,46 @@ public class RequestServiceImpl implements RequestService {
             throw new EventNotFoundException(String.format("События с id = %s не существует.", eventId));
         }
         Event event = eventOptional.get();
-        long requestsCount = requestRepository.countByEvent(eventId);
-        List<Request> requests = requestRepository.findAllByIdInOrderByCreatedAsc(updateStatusRequestDto.getRequestIds());
-        Integer participantLimit = event.getParticipantLimit();
-        if (!participantLimit.equals(0) && event.getRequestModeration()) {
-            for (Request request : requests) {
-                if (request.getStatus() != Status.PENDING) {
-                    throw new ActionNotAllowedException("Cтатус можно изменить только у заявок, " +
-                            "находящихся в состоянии ожидания.");
-                }
-                request.setStatus(Status.CONFIRMED);
-                participantLimit--;
+        Integer limit = event.getParticipantLimit();
+        if (limit != 0) {
+            long requestsCount = requestRepository.countByEventAndStatusLike(eventId, Status.CONFIRMED);
+            if (limit == requestsCount) {
+                throw new ActionNotAllowedException("Достигнут лимит запросов");
             }
-
-
         }
-        return null;
+        List<Request> requests = requestRepository.findAllByIdInOrderByCreatedAsc(updateStatusRequestDto.getRequestIds());
+        if (event.getRequestModeration()) {
+            if (limit == 0) {
+                for (Request request : requests) {
+                    if (request.getStatus() != Status.PENDING) {
+                        throw new ActionNotAllowedException("Cтатус можно изменить только у заявок, " +
+                                "находящихся в состоянии ожидания.");
+                    }
+                    request.setStatus(Status.CONFIRMED);
+                }
+            } else {
+                for (Request request : requests) {
+                    if (request.getStatus() != Status.PENDING) {
+                        throw new ActionNotAllowedException("Cтатус можно изменить только у заявок, " +
+                                "находящихся в состоянии ожидания.");
+                    }
+                    if (limit > 0) {
+                        request.setStatus(Status.CONFIRMED);
+                        limit--;
+                    } else {
+                        request.setStatus(Status.REJECTED);
+                    }
+                }
+            }
+        }
+        List<ParticipationRequestDto> confirmedRequests = requests.stream()
+                .filter(request -> request.getStatus() == Status.CONFIRMED)
+                .map(request -> modelMapper.map(request, ParticipationRequestDto.class))
+                .toList();
+        List<ParticipationRequestDto> rejectedRequests = requests.stream()
+                .filter(request -> request.getStatus() == Status.REJECTED)
+                .map(request -> modelMapper.map(request, ParticipationRequestDto.class))
+                .toList();
+        return new UpdateStatusResultDto(confirmedRequests, rejectedRequests);
     }
 }
