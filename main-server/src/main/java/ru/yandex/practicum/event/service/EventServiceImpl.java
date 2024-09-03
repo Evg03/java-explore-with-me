@@ -85,6 +85,9 @@ public class EventServiceImpl implements EventService {
         if (updateEventUserRequest.getStateAction() == Action.CANCEL_REVIEW) {
             event.setState(State.CANCELED);
         }
+        if (updateEventUserRequest.getStateAction() == Action.SEND_TO_REVIEW) {
+            event.setState(State.PENDING);
+        }
         modelMapper.map(updateEventUserRequest, event);
         EventDto eventDto = modelMapper.map(eventRepository.save(event), EventDto.class);
         long confirmedRequests = requestRepository.countByEventAndStatusLike(eventId, Status.CONFIRMED);
@@ -112,7 +115,7 @@ public class EventServiceImpl implements EventService {
                             "только если оно в состоянии ожидания публикации.");
                 }
             }
-            if (action == Action.SEND_TO_REVIEW || action == Action.REJECT_EVENT) {
+            if (action == Action.REJECT_EVENT) {
                 if (state == State.PENDING) {
                     event.setState(State.CANCELED);
                 } else {

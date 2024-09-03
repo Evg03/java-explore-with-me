@@ -81,6 +81,17 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleCompilationNotFoundException(final CompilationNotFoundException e) {
+        log.warn("Подборка не найдена.", e);
+        return new ErrorResponse(
+                HttpStatus.NOT_FOUND.name(),
+                "Compilation not found.",
+                e.getMessage(),
+                LocalDateTime.now());
+    }
+
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleInvalidEventDateException(final InvalidEventDateException e) {
         log.warn("Неверная дата.", e);
