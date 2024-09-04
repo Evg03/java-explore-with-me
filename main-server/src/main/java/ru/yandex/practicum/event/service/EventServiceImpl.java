@@ -1,5 +1,6 @@
 package ru.yandex.practicum.event.service;
 
+import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.PageRequest;
@@ -17,8 +18,11 @@ import ru.yandex.practicum.user.model.User;
 import ru.yandex.practicum.user.storage.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+
 
 @Service
 @RequiredArgsConstructor
@@ -198,16 +202,53 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventShortDto getAllEvents(String text,
-                                      List<Integer> categories,
-                                      Boolean paid,
-                                      LocalDateTime rangeStart,
-                                      LocalDateTime rangeEnd,
-                                      Boolean onlyAvailable,
-                                      SortFilter sort,
-                                      Integer from,
-                                      Integer size) {
-        return new EventShortDto();
+    public List<EventShortDto> getAllEvents(String text,
+                                            List<Integer> categories,
+                                            Boolean paid,
+                                            LocalDateTime rangeStart,
+                                            LocalDateTime rangeEnd,
+                                            Boolean onlyAvailable,
+                                            SortFilter sortFilter,
+                                            Integer from,
+                                            Integer size) {
+        List<BooleanExpression> predicates = new ArrayList<>();
+        if (text != null) {
+            predicates.add(QEvent.event.annotation.containsIgnoreCase(text));
+            predicates.add(QEvent.event.description.containsIgnoreCase(text));
+        }
+        if (categories != null) {
+            predicates.add(QEvent.event.category.in(categories));
+        }
+        if (paid != null) {
+            predicates.add(QEvent.event.paid.eq(paid));
+        }
+        if (rangeStart != null && rangeEnd != null) {
+            if (rangeStart.isAfter(rangeEnd)) {
+                throw new InvalidDateRangeException("Дата начала диапазона не может быть позже даты конца диапазона.");
+            }
+            predicates.add(QEvent.event.eventDate.after(rangeStart));
+            predicates.add(QEvent.event.eventDate.before(rangeEnd));
+        } else {
+            predicates.add(QEvent.event.eventDate.after(LocalDateTime.now()));
+        }
+        predicates.add(QEvent.event.state.eq(State.PUBLISHED));
+
+        BooleanExpression filters = predicates.get(0);
+        for (int i = 1; i < predicates.size(); i++) {
+            BooleanExpression predicate = predicates.get(i);
+            filters = filters.and(predicate);
+        }
+        List<Event> events = eventRepository.findAll(filters, PageRequest.of(from, size)).toList();
+
+        return events.stream()
+                .filter(this::isAvailable)
+                .map(event -> modelMapper.map(event, EventShortDto.class))
+                .peek(eventDto -> {
+                    long confirmedRequests = requestRepository.countByEventAndStatusLike(eventDto.getId(), Status.CONFIRMED);
+                    eventDto.setConfirmedRequests((int) confirmedRequests);
+                })
+                .sorted(getSortComparator(sortFilter))
+                .toList();
     }
 
     @Override
@@ -222,4 +263,24 @@ public class EventServiceImpl implements EventService {
         eventDto.setConfirmedRequests((int) confirmedRequests);
         return eventDto;
     }
+
+    private boolean isAvailable(Event event) {
+        return event.getParticipantLimit() > requestRepository.countByEventAndStatusLike(event.getId(),
+                Status.CONFIRMED);
+    }
+
+    private Comparator<EventShortDto> getSortComparator(SortFilter sortFilter) {
+        Comparator<EventShortDto> comparator;
+        if (sortFilter != null) {
+            if (sortFilter == SortFilter.EVENT_DATE) {
+                comparator = (o1, o2) -> o1.getEventDate().compareTo(o2.getEventDate());
+            } else {
+                comparator = (o1, o2) -> o1.getViews().compareTo(o2.getViews());
+            }
+        } else {
+            comparator = (o1, o2) -> o1.getId().compareTo(o2.getId());
+        }
+        return comparator;
+    }
+
 }

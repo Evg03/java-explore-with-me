@@ -31,13 +31,13 @@ public interface EventService {
                                 Integer from,
                                 Integer size);
 
-    EventShortDto getAllEvents(String text,
+    List<EventShortDto> getAllEvents(String text,
                                List<Integer> categories,
                                Boolean paid,
                                LocalDateTime rangeStart,
                                LocalDateTime rangeEnd,
                                Boolean onlyAvailable,
-                               SortFilter sort,
+                               SortFilter sortFilter,
                                Integer from,
                                Integer size);
 

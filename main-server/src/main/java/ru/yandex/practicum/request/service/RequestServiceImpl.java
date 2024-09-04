@@ -52,7 +52,7 @@ public class RequestServiceImpl implements RequestService {
         if (limit != 0 && limit == requestsCount) {
             throw new ActionNotAllowedException("Достигнут лимит запросов");
         }
-        Status status = event.getRequestModeration() ? Status.PENDING : Status.CONFIRMED;
+        Status status = limit == 0 ? Status.CONFIRMED : event.getRequestModeration() ? Status.PENDING : Status.CONFIRMED;
         Request request = new Request(null, eventId, LocalDateTime.now(), userId, status);
         Request savedRequest = requestRepository.save(request);
         return modelMapper.map(savedRequest, ParticipationRequestDto.class);
@@ -117,45 +117,63 @@ public class RequestServiceImpl implements RequestService {
         }
         Event event = eventOptional.get();
         Integer limit = event.getParticipantLimit();
-        if (limit != 0) {
+        Status updateStatus = updateStatusRequestDto.getStatus();
+
+        if (limit != 0 && updateStatus != Status.REJECTED) {
             long requestsCount = requestRepository.countByEventAndStatusLike(eventId, Status.CONFIRMED);
-            if (limit == requestsCount) {
-                throw new ActionNotAllowedException("Достигнут лимит запросов");
+            if (limit <= requestsCount) {
+                throw new ActionNotAllowedException("Достигнут лимит запросов!");
             }
         }
         List<Request> requests = requestRepository.findAllByIdInOrderByCreatedAsc(updateStatusRequestDto.getRequestIds());
-        if (event.getRequestModeration()) {
-            if (limit == 0) {
-                for (Request request : requests) {
-                    if (request.getStatus() != Status.PENDING) {
-                        throw new ActionNotAllowedException("Cтатус можно изменить только у заявок, " +
-                                "находящихся в состоянии ожидания.");
-                    }
-                    request.setStatus(Status.CONFIRMED);
-                }
-            } else {
-                for (Request request : requests) {
-                    if (request.getStatus() != Status.PENDING) {
-                        throw new ActionNotAllowedException("Cтатус можно изменить только у заявок, " +
-                                "находящихся в состоянии ожидания.");
-                    }
-                    if (limit > 0) {
-                        request.setStatus(Status.CONFIRMED);
-                        limit--;
-                    } else {
-                        request.setStatus(Status.REJECTED);
-                    }
-                }
-            }
+        if (event.getRequestModeration() && updateStatus == Status.CONFIRMED) {
+            confirmRequests(requests, limit);
         }
-        List<ParticipationRequestDto> confirmedRequests = requests.stream()
+        if (updateStatus == Status.REJECTED) {
+            rejectRequests(requests);
+        }
+        List<Request> savedRequests = requestRepository.saveAll(requests);
+        List<ParticipationRequestDto> confirmedRequests = savedRequests.stream()
                 .filter(request -> request.getStatus() == Status.CONFIRMED)
                 .map(request -> modelMapper.map(request, ParticipationRequestDto.class))
                 .toList();
-        List<ParticipationRequestDto> rejectedRequests = requests.stream()
+        List<ParticipationRequestDto> rejectedRequests = savedRequests.stream()
                 .filter(request -> request.getStatus() == Status.REJECTED)
                 .map(request -> modelMapper.map(request, ParticipationRequestDto.class))
                 .toList();
         return new UpdateStatusResultDto(confirmedRequests, rejectedRequests);
+    }
+
+    private void validateStatus(Request request) {
+        if (request.getStatus() != Status.PENDING) {
+            throw new ActionNotAllowedException("Cтатус можно изменить только у заявок, " +
+                    "находящихся в состоянии ожидания.");
+        }
+    }
+
+    private void confirmRequests(List<Request> requests, int limit) {
+        if (limit == 0) {
+            for (Request request : requests) {
+                validateStatus(request);
+                request.setStatus(Status.CONFIRMED);
+            }
+        } else {
+            for (Request request : requests) {
+                validateStatus(request);
+                if (limit > 0) {
+                    request.setStatus(Status.CONFIRMED);
+                    limit--;
+                } else {
+                    request.setStatus(Status.REJECTED);
+                }
+            }
+        }
+    }
+
+    private void rejectRequests(List<Request> requests) {
+        for (Request request : requests) {
+            validateStatus(request);
+            request.setStatus(Status.REJECTED);
+        }
     }
 }

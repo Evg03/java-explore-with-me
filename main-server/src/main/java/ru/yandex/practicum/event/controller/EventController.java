@@ -72,14 +72,14 @@ public class EventController {
 
     @GetMapping(path = "/events")
     @ResponseStatus(HttpStatus.OK)
-    public EventShortDto getAllEvents(@RequestParam String text,
-                                      @RequestParam List<Integer> categories,
-                                      @RequestParam(defaultValue = "false") Boolean paid,
+    public List<EventShortDto> getAllEvents(@RequestParam(required = false) String text,
+                                      @RequestParam(required = false) List<Integer> categories,
+                                      @RequestParam(required = false) Boolean paid,
                                       @RequestParam(required = false)
                                       @DateTimeFormat(pattern = DATE_TIME_FORMAT) LocalDateTime rangeStart,
                                       @RequestParam(required = false)
                                       @DateTimeFormat(pattern = DATE_TIME_FORMAT) LocalDateTime rangeEnd,
-                                      @RequestParam(defaultValue = "false") Boolean onlyAvailable,
+                                      @RequestParam(required = false) Boolean onlyAvailable,
                                       @RequestParam(required = false) SortFilter sort,
                                       @RequestParam(defaultValue = "0") Integer from,
                                       @RequestParam(defaultValue = "10") Integer size) {

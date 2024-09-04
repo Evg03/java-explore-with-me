@@ -2,12 +2,13 @@ package ru.yandex.practicum.event.storage;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import ru.yandex.practicum.event.model.Event;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-public interface EventRepository extends JpaRepository<Event, Integer> {
+public interface EventRepository extends JpaRepository<Event, Integer>, QuerydslPredicateExecutor<Event> {
 
     List<Event> findByInitiatorId(int userId, Pageable pageable);
 
@@ -17,5 +18,6 @@ public interface EventRepository extends JpaRepository<Event, Integer> {
                                                                                               LocalDateTime rangeStart,
                                                                                               LocalDateTime rangeEnd,
                                                                                               Pageable pageable);
+
 
 }

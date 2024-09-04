@@ -1,8 +1,11 @@
 package ru.yandex.practicum.request.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.exception.ActionNotAllowedException;
+import ru.yandex.practicum.exception.InvalidOwnerException;
 import ru.yandex.practicum.request.dto.UpdateStatusRequestDto;
 import ru.yandex.practicum.request.dto.ParticipationRequestDto;
 import ru.yandex.practicum.request.dto.UpdateStatusResultDto;
@@ -43,7 +46,7 @@ public class RequestController {
     @PatchMapping(path = "/users/{userId}/events/{eventId}/requests")
     @ResponseStatus(HttpStatus.OK)
     public UpdateStatusResultDto updateRequestsStatus(@PathVariable int userId, @PathVariable int eventId,
-                                                      @RequestBody UpdateStatusRequestDto updateStatusRequestDto) {
+                                                      @Valid @RequestBody UpdateStatusRequestDto updateStatusRequestDto) {
         return requestService.updateRequestsStatus(userId, eventId, updateStatusRequestDto);
     }
 }
