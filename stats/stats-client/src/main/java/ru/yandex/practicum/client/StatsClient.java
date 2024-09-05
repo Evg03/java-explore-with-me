@@ -15,14 +15,14 @@ import java.util.List;
 
 @Service
 public class StatsClient extends BaseClient {
-    private static final String API_PREFIX = "/hits";
+    private static final String API_PREFIX = "/hit";
 
     @Autowired
     public StatsClient(@Value("${stats-server.url}") String serverUrl, RestTemplateBuilder builder) {
         super(
                 builder
                         .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl + API_PREFIX))
-                        .detectRequestFactory(false)
+                        .detectRequestFactory(true)
                         .build()
         );
     }
