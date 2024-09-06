@@ -1,5 +1,6 @@
 package ru.yandex.practicum.event.service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,14 +33,15 @@ public interface EventService {
                                 Integer size);
 
     List<EventShortDto> getAllEvents(String text,
-                               List<Integer> categories,
-                               Boolean paid,
-                               LocalDateTime rangeStart,
-                               LocalDateTime rangeEnd,
-                               Boolean onlyAvailable,
-                               SortFilter sortFilter,
-                               Integer from,
-                               Integer size);
+                                     List<Integer> categories,
+                                     Boolean paid,
+                                     LocalDateTime rangeStart,
+                                     LocalDateTime rangeEnd,
+                                     Boolean onlyAvailable,
+                                     SortFilter sortFilter,
+                                     Integer from,
+                                     Integer size,
+                                     HttpServletRequest request);
 
-    EventDto getEventById(int id);
+    EventDto getEventById(int id, HttpServletRequest request);
 }

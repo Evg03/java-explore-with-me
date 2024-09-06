@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.exception.InvalidDateRangeException;
 import ru.yandex.practicum.stats.dto.HitDto;
 import ru.yandex.practicum.stats.dto.StatsDto;
 
@@ -26,6 +27,9 @@ public class HitServiceImpl implements HitService {
 
     @Override
     public List<StatsDto> getStats(LocalDateTime start, LocalDateTime end, Optional<List<String>> uris, Boolean unique) {
+        if (start.isAfter(end)) {
+            throw new InvalidDateRangeException("Дата начала диапазона не может быть позже даты конца диапазона.");
+        }
         if (uris.isPresent() && !uris.get().isEmpty()) {
             if (unique) {
                 return hitRepository.getStatsByUrisByUniqueIp(start, end, uris.get());

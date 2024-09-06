@@ -1,6 +1,7 @@
 package ru.yandex.practicum.event.controller;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -73,23 +74,25 @@ public class EventController {
     @GetMapping(path = "/events")
     @ResponseStatus(HttpStatus.OK)
     public List<EventShortDto> getAllEvents(@RequestParam(required = false) String text,
-                                      @RequestParam(required = false) List<Integer> categories,
-                                      @RequestParam(required = false) Boolean paid,
-                                      @RequestParam(required = false)
-                                      @DateTimeFormat(pattern = DATE_TIME_FORMAT) LocalDateTime rangeStart,
-                                      @RequestParam(required = false)
-                                      @DateTimeFormat(pattern = DATE_TIME_FORMAT) LocalDateTime rangeEnd,
-                                      @RequestParam(required = false) Boolean onlyAvailable,
-                                      @RequestParam(required = false) SortFilter sort,
-                                      @RequestParam(defaultValue = "0") Integer from,
-                                      @RequestParam(defaultValue = "10") Integer size) {
-        return eventService.getAllEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);
+                                            @RequestParam(required = false) List<Integer> categories,
+                                            @RequestParam(required = false) Boolean paid,
+                                            @RequestParam(required = false)
+                                            @DateTimeFormat(pattern = DATE_TIME_FORMAT) LocalDateTime rangeStart,
+                                            @RequestParam(required = false)
+                                            @DateTimeFormat(pattern = DATE_TIME_FORMAT) LocalDateTime rangeEnd,
+                                            @RequestParam(required = false) Boolean onlyAvailable,
+                                            @RequestParam(required = false) SortFilter sort,
+                                            @RequestParam(defaultValue = "0") Integer from,
+                                            @RequestParam(defaultValue = "10") Integer size,
+                                            HttpServletRequest request) {
+        return eventService.getAllEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable,
+                sort, from, size, request);
     }
 
     @GetMapping(path = "/events/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public EventDto getEventById(@PathVariable int id) {
-        return eventService.getEventById(id);
+    public EventDto getEventById(@PathVariable int id, HttpServletRequest request) {
+        return eventService.getEventById(id, request);
     }
 
 

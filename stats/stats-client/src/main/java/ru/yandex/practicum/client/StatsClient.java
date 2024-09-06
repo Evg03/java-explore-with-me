@@ -37,7 +37,7 @@ public class StatsClient extends BaseClient {
 
         if (uris != null && !uris.isEmpty()) {
             if (sb.isEmpty()) {
-                sb.insert(0,"?");
+                sb.insert(0, "?");
             }
             for (int i = 0; i < uris.size(); i++) {
                 String uri = uris.get(i);
@@ -49,7 +49,7 @@ public class StatsClient extends BaseClient {
             }
         }
         if (sb.isEmpty()) {
-            sb.insert(0,"?");
+            sb.insert(0, "?");
         } else {
             sb.append("&");
         }
