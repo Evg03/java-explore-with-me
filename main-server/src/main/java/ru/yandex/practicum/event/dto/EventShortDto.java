@@ -19,5 +19,5 @@ public class EventShortDto {
     private LocalDateTime eventDate;
     private Boolean paid;
     private String title;
-    private Integer views = 0;
+    private Long views = 0L;
 }

@@ -1,4 +1,4 @@
-package ru.yandex.practicum.event.model;
+package ru.yandex.practicum.event.service;
 
 public enum SortFilter {
     EVENT_DATE,

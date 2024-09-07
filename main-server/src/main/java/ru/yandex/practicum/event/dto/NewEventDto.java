@@ -5,7 +5,6 @@ import jakarta.validation.constraints.*;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.jackson.Jacksonized;
-import ru.yandex.practicum.event.model.Location;
 
 import java.time.LocalDateTime;
 

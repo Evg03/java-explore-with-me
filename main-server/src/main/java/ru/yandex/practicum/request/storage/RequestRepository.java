@@ -1,7 +1,6 @@
 package ru.yandex.practicum.request.storage;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import ru.yandex.practicum.request.dto.ParticipationRequestDto;
 import ru.yandex.practicum.request.model.Request;
 import ru.yandex.practicum.request.model.Status;
 

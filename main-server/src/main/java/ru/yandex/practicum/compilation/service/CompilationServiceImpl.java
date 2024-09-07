@@ -1,5 +1,6 @@
 package ru.yandex.practicum.compilation.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.PageRequest;
@@ -9,7 +10,6 @@ import ru.yandex.practicum.compilation.dto.CompilationDto;
 import ru.yandex.practicum.compilation.dto.NewCompilationDto;
 import ru.yandex.practicum.compilation.dto.UpdateCompilationRequest;
 import ru.yandex.practicum.compilation.model.Compilation;
-import ru.yandex.practicum.compilation.model.CompilationMapper;
 import ru.yandex.practicum.compilation.storage.CompilationRepository;
 import ru.yandex.practicum.event.model.Event;
 import ru.yandex.practicum.event.storage.EventRepository;
@@ -27,6 +27,7 @@ public class CompilationServiceImpl implements CompilationService {
     private final ModelMapper modelMapper = new CompilationMapper();
 
     @Override
+    @Transactional
     public CompilationDto createCompilation(NewCompilationDto newCompilationDto) {
         Compilation compilation = modelMapper.map(newCompilationDto, Compilation.class);
         List<Integer> eventsIds = newCompilationDto.getEvents();
@@ -37,6 +38,7 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
+    @Transactional
     public void deleteCompilation(int compId) {
         Optional<Compilation> compilationOptional = compilationRepository.findById(compId);
         if (compilationOptional.isEmpty()) {
@@ -46,6 +48,7 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
+    @Transactional
     public CompilationDto updateCompilation(UpdateCompilationRequest updateCompilationRequest, int compId) {
         Optional<Compilation> compilationOptional = compilationRepository.findById(compId);
         if (compilationOptional.isEmpty()) {

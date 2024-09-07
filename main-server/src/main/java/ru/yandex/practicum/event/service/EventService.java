@@ -1,13 +1,7 @@
 package ru.yandex.practicum.event.service;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import ru.yandex.practicum.event.dto.*;
-import ru.yandex.practicum.event.model.Event;
-import ru.yandex.practicum.event.model.SortFilter;
 
 import java.time.LocalDateTime;
 import java.util.List;

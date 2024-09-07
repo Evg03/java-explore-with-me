@@ -1,5 +1,6 @@
 package ru.yandex.practicum.request.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -30,11 +31,9 @@ public class RequestServiceImpl implements RequestService {
     private final ModelMapper modelMapper = new ModelMapper();
 
     @Override
+    @Transactional
     public ParticipationRequestDto createRequest(int userId, int eventId) {
-        Optional<User> userOptional = userRepository.findById(userId);
-        if (userOptional.isEmpty()) {
-            throw new UserNotFoundException(String.format("Пользователя с id = %s не существует.", userId));
-        }
+        validateUser(userId);
         Optional<Event> eventOptional = eventRepository.findById(eventId);
         if (eventOptional.isEmpty()) {
             throw new EventNotFoundException(String.format("События с id = %s не существует.", eventId));
@@ -60,16 +59,14 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public List<ParticipationRequestDto> getUserRequests(int userId) {
-        Optional<User> userOptional = userRepository.findById(userId);
-        if (userOptional.isEmpty()) {
-            throw new UserNotFoundException(String.format("Пользователя с id = %s не существует.", userId));
-        }
+        validateUser(userId);
         return requestRepository.findAllByRequesterOrderById(userId).stream()
                 .map(request -> modelMapper.map(request, ParticipationRequestDto.class))
                 .toList();
     }
 
     @Override
+    @Transactional
     public ParticipationRequestDto cancelRequest(int userId, int requestId) {
         Optional<User> userOptional = userRepository.findById(userId);
         if (userOptional.isEmpty()) {
@@ -92,10 +89,7 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public List<ParticipationRequestDto> getUserEventRequests(int userId, int eventId) {
-        Optional<User> userOptional = userRepository.findById(userId);
-        if (userOptional.isEmpty()) {
-            throw new UserNotFoundException(String.format("Пользователя с id = %s не существует.", userId));
-        }
+        validateUser(userId);
         Optional<Event> eventOptional = eventRepository.findById(eventId);
         if (eventOptional.isEmpty()) {
             throw new EventNotFoundException(String.format("События с id = %s не существует.", eventId));
@@ -106,11 +100,9 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
+    @Transactional
     public UpdateStatusResultDto updateRequestsStatus(int userId, int eventId, UpdateStatusRequestDto updateStatusRequestDto) {
-        Optional<User> userOptional = userRepository.findById(userId);
-        if (userOptional.isEmpty()) {
-            throw new UserNotFoundException(String.format("Пользователя с id = %s не существует.", userId));
-        }
+        validateUser(userId);
         Optional<Event> eventOptional = eventRepository.findById(eventId);
         if (eventOptional.isEmpty()) {
             throw new EventNotFoundException(String.format("События с id = %s не существует.", eventId));
@@ -148,6 +140,13 @@ public class RequestServiceImpl implements RequestService {
         if (request.getStatus() != Status.PENDING) {
             throw new ActionNotAllowedException("Cтатус можно изменить только у заявок, " +
                     "находящихся в состоянии ожидания.");
+        }
+    }
+
+    private void validateUser(int userId) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isEmpty()) {
+            throw new UserNotFoundException(String.format("Пользователя с id = %s не существует.", userId));
         }
     }
 

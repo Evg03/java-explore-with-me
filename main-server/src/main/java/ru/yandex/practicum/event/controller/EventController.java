@@ -1,6 +1,5 @@
 package ru.yandex.practicum.event.controller;
 
-import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -8,8 +7,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.event.dto.*;
-import ru.yandex.practicum.event.model.Event;
-import ru.yandex.practicum.event.model.SortFilter;
+import ru.yandex.practicum.event.service.SortFilter;
 import ru.yandex.practicum.event.service.EventService;
 
 import java.time.LocalDateTime;

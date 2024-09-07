@@ -1,6 +1,5 @@
 package ru.yandex.practicum.user.service;
 
-import org.springframework.web.bind.annotation.RequestParam;
 import ru.yandex.practicum.user.dto.NewUserRequest;
 import ru.yandex.practicum.user.dto.UserDto;
 

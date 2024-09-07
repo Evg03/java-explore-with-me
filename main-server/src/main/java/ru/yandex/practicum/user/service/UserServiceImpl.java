@@ -1,7 +1,10 @@
 package ru.yandex.practicum.user.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.exception.UserNotFoundException;
 import ru.yandex.practicum.user.dto.NewUserRequest;
@@ -20,6 +23,7 @@ public class UserServiceImpl implements UserService {
     private final ModelMapper modelMapper = new ModelMapper();
 
     @Override
+    @Transactional
     public UserDto createUser(NewUserRequest newUserRequest) {
         User user = modelMapper.map(newUserRequest, User.class);
         User savedUser = userRepository.save(user);
@@ -35,10 +39,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDto> getUsers(int from, int size) {
-        return userRepository.findWithOffsetAndLimit(from, size);
+        return userRepository.findAll(PageRequest.of(from, size, Sort.by("id").ascending()))
+                .map(user -> modelMapper.map(user, UserDto.class))
+                .toList();
     }
 
     @Override
+    @Transactional
     public void deleteUser(int userId) {
         Optional<User> user = userRepository.findById(userId);
         if (user.isEmpty()) {

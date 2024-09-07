@@ -1,15 +1,8 @@
 package ru.yandex.practicum.event.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.jackson.Jacksonized;
-import ru.yandex.practicum.user.dto.UserShortDto;
 import ru.yandex.practicum.user.model.User;
 
 import java.time.LocalDateTime;

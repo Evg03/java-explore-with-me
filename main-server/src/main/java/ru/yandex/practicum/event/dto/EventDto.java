@@ -5,7 +5,6 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import ru.yandex.practicum.event.model.Location;
 import ru.yandex.practicum.event.model.State;
 import ru.yandex.practicum.user.dto.UserShortDto;
 
@@ -33,5 +32,5 @@ public class EventDto {
     @Enumerated(EnumType.STRING)
     private State state;
     private String title;
-    private Integer views = 0;
+    private Long views = 0L;
 }

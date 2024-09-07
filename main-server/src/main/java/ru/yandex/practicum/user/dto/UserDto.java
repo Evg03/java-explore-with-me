@@ -1,7 +1,6 @@
 package ru.yandex.practicum.user.dto;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
 @Data

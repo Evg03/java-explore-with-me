@@ -1,10 +1,9 @@
 package ru.yandex.practicum.category.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.category.dto.CategoryDto;
@@ -25,6 +24,7 @@ public class CategoryServiceImpl implements CategoryService {
     private final ModelMapper modelMapper = new ModelMapper();
 
     @Override
+    @Transactional
     public CategoryDto createCategory(NewCategoryDto newCategoryDto) {
         Category category = modelMapper.map(newCategoryDto, Category.class);
         Category savedCategory = categoryRepository.save(category);
@@ -32,6 +32,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Transactional
     public CategoryDto updateCategory(int id, UpdateCategoryDto updateCategoryDto) {
         Optional<Category> optionalCategory = categoryRepository.findById(id);
         if (optionalCategory.isEmpty()) {
@@ -44,6 +45,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Transactional
     public void deleteCategory(int id) {
         Optional<Category> optionalCategory = categoryRepository.findById(id);
         if (optionalCategory.isEmpty()) {
@@ -54,10 +56,6 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<CategoryDto> getCategories(int from, int size) {
-        //TODO удалить
-//        return categoryRepository.findAll(PageRequest.of(from, size, Sort.by("id"))).stream().map(category -> modelMapper.map(category, CategoryDto.class)).toList();
-//        return categoryRepository.findWithOffsetAndLimit(from, size);
-//        return categoryRepository.findWithOffsetAndLimit(from, size);
         return categoryRepository.findAll(PageRequest.of(from,size, Sort.by("id").ascending())).stream()
                 .map(category -> modelMapper.map(category, CategoryDto.class))
                 .toList();

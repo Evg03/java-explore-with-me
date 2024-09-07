@@ -7,7 +7,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 
@@ -143,17 +142,6 @@ public class ErrorHandler {
         return new ErrorResponse(
                 HttpStatus.BAD_REQUEST.name(),
                 "Invalid date range.",
-                e.getMessage(),
-                LocalDateTime.now());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleResponseStatusException(final ResponseStatusException e) {
-        log.warn("Неправильный статус ответа.", e);
-        return new ErrorResponse(
-                HttpStatus.INTERNAL_SERVER_ERROR.name(),
-                "Invalid response status.",
                 e.getMessage(),
                 LocalDateTime.now());
     }
