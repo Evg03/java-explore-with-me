@@ -5,10 +5,13 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import ru.yandex.practicum.comment.dto.CommentDto;
 import ru.yandex.practicum.event.model.State;
 import ru.yandex.practicum.user.dto.UserShortDto;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @RequiredArgsConstructor
@@ -33,4 +36,5 @@ public class EventDto {
     private State state;
     private String title;
     private Long views = 0L;
+    private List<CommentDto> comments = new ArrayList<>();
 }
