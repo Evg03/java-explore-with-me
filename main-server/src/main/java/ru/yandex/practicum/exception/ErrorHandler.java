@@ -92,6 +92,17 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleCommentNotFoundException(final CommentNotFoundException e) {
+        log.warn("Комментарий не найден.", e);
+        return new ErrorResponse(
+                HttpStatus.NOT_FOUND.name(),
+                "Comment not found.",
+                e.getMessage(),
+                LocalDateTime.now());
+    }
+
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleInvalidEventDateException(final InvalidEventDateException e) {
         log.warn("Неверная дата.", e);

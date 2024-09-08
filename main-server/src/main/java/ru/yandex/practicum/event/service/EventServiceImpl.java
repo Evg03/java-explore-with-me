@@ -13,6 +13,9 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.category.model.Category;
 import ru.yandex.practicum.category.storage.CategoryRepository;
 import ru.yandex.practicum.client.StatsClient;
+import ru.yandex.practicum.comment.dto.CommentDto;
+import ru.yandex.practicum.comment.service.CommentMapper;
+import ru.yandex.practicum.comment.storage.CommentRepository;
 import ru.yandex.practicum.event.dto.*;
 import ru.yandex.practicum.event.model.Event;
 import ru.yandex.practicum.event.model.QEvent;
@@ -37,8 +40,11 @@ public class EventServiceImpl implements EventService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final RequestRepository requestRepository;
+    private final CommentRepository commentRepository;
     private final StatsClient statsClient;
-    private final ModelMapper modelMapper = new EventMapper();
+    private final ModelMapper eventMapper = new EventMapper();
+    private final ModelMapper commentMapper = new CommentMapper();
+
 
     @Override
     @Transactional
@@ -56,9 +62,9 @@ public class EventServiceImpl implements EventService {
         if (optionalCategory.isEmpty()) {
             throw new CategoryNotFoundException(String.format("Категории с id = %s не существует.", categoryId));
         }
-        Event event = modelMapper.map(newEventDto, Event.class);
+        Event event = eventMapper.map(newEventDto, Event.class);
         event.setInitiator(userOptional.get());
-        return modelMapper.map(eventRepository.save(event), EventDto.class);
+        return eventMapper.map(eventRepository.save(event), EventDto.class);
     }
 
     @Override
@@ -94,10 +100,11 @@ public class EventServiceImpl implements EventService {
         if (updateEventUserRequest.getStateAction() == Action.SEND_TO_REVIEW) {
             event.setState(State.PENDING);
         }
-        modelMapper.map(updateEventUserRequest, event);
-        EventDto eventDto = modelMapper.map(eventRepository.save(event), EventDto.class);
+        eventMapper.map(updateEventUserRequest, event);
+        EventDto eventDto = eventMapper.map(eventRepository.save(event), EventDto.class);
         eventDto.setConfirmedRequests(getConfirmedRequestsCount(eventId));
         eventDto.setViews(getViews(eventDto.getId(), eventDto.getCreatedOn()));
+        eventDto.setComments(getEventComments(eventId));
         return eventDto;
     }
 
@@ -130,14 +137,15 @@ public class EventServiceImpl implements EventService {
                 }
             }
         }
-        modelMapper.map(updateEventAdminRequest, event);
+        eventMapper.map(updateEventAdminRequest, event);
         if (event.getPublishedOn() != null && event.getEventDate().isBefore(event.getPublishedOn())) {
             throw new ActionNotAllowedException("Дата начала изменяемого события должна быть " +
                     "не ранее чем за час от даты публикации.");
         }
-        EventDto eventDto = modelMapper.map(eventRepository.save(event), EventDto.class);
+        EventDto eventDto = eventMapper.map(eventRepository.save(event), EventDto.class);
         eventDto.setConfirmedRequests(getConfirmedRequestsCount(eventId));
         eventDto.setViews(getViews(eventDto.getId(), eventDto.getCreatedOn()));
+        eventDto.setComments(getEventComments(eventId));
         return eventDto;
     }
 
@@ -150,9 +158,10 @@ public class EventServiceImpl implements EventService {
         }
         Event event = eventOptional.get();
         validateEventOwner(event, userId);
-        EventDto eventDto = modelMapper.map(event, EventDto.class);
+        EventDto eventDto = eventMapper.map(event, EventDto.class);
         eventDto.setConfirmedRequests(getConfirmedRequestsCount(eventId));
         eventDto.setViews(getViews(eventDto.getId(), eventDto.getCreatedOn()));
+        eventDto.setComments(getEventComments(eventId));
         return eventDto;
     }
 
@@ -163,7 +172,7 @@ public class EventServiceImpl implements EventService {
                 PageRequest.of(from, size, Sort.by("id").ascending()));
         Map<Integer, Long> viewsMap = getViewsMap(events);
         return events.stream()
-                .map(event -> modelMapper.map(event, EventShortDto.class))
+                .map(event -> eventMapper.map(event, EventShortDto.class))
                 .peek(eventShortDto -> {
                     eventShortDto.setConfirmedRequests(getConfirmedRequestsCount(eventShortDto.getId()));
                     eventShortDto.setViews(viewsMap.get(eventShortDto.getId()));
@@ -201,10 +210,11 @@ public class EventServiceImpl implements EventService {
         List<Event> events = eventRepository.findAll(filters, PageRequest.of(from, size)).toList();
 
         return events.stream()
-                .map(event -> modelMapper.map(event, EventDto.class))
+                .map(event -> eventMapper.map(event, EventDto.class))
                 .peek(eventDto -> {
                     eventDto.setConfirmedRequests(getConfirmedRequestsCount(eventDto.getId()));
                     eventDto.setViews(getViews(eventDto.getId(), eventDto.getCreatedOn()));
+                    eventDto.setComments(getEventComments(eventDto.getId()));
                 })
                 .toList();
     }
@@ -245,7 +255,7 @@ public class EventServiceImpl implements EventService {
         Map<Integer, Long> viewsMap = getViewsMap(events);
         saveStatistics(request);
         return events.stream()
-                .map(event -> modelMapper.map(event, EventShortDto.class))
+                .map(event -> eventMapper.map(event, EventShortDto.class))
                 .peek(eventShortDto -> {
                     eventShortDto.setConfirmedRequests(getConfirmedRequestsCount(eventShortDto.getId()));
                     eventShortDto.setViews(viewsMap.get(eventShortDto.getId()));
@@ -261,10 +271,11 @@ public class EventServiceImpl implements EventService {
             throw new EventNotFoundException(String.format("Опубликованного события с id = %s не найдено.", id));
         }
         Event event = eventOptional.get();
-        EventDto eventDto = modelMapper.map(event, EventDto.class);
+        EventDto eventDto = eventMapper.map(event, EventDto.class);
         eventDto.setConfirmedRequests(getConfirmedRequestsCount(id));
         saveStatistics(request);
         eventDto.setViews(getViews(eventDto.getId(), eventDto.getCreatedOn()));
+        eventDto.setComments(getEventComments(eventDto.getId()));
         return eventDto;
     }
 
@@ -334,5 +345,10 @@ public class EventServiceImpl implements EventService {
         } else {
             return 0;
         }
+    }
+
+    private List<CommentDto> getEventComments(int eventId) {
+        return commentRepository.findByEventOrderByCreatedDesc(eventId).stream()
+                .map(comment -> commentMapper.map(comment, CommentDto.class)).toList();
     }
 }
