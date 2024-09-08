@@ -47,10 +47,6 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public void deleteCategory(int id) {
-        Optional<Category> optionalCategory = categoryRepository.findById(id);
-        if (optionalCategory.isEmpty()) {
-            throw new CategoryNotFoundException(String.format("Категории с id = %s не существует.", id));
-        }
         categoryRepository.deleteById(id);
     }
 

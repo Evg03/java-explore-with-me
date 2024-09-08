@@ -40,10 +40,6 @@ public class CompilationServiceImpl implements CompilationService {
     @Override
     @Transactional
     public void deleteCompilation(int compId) {
-        Optional<Compilation> compilationOptional = compilationRepository.findById(compId);
-        if (compilationOptional.isEmpty()) {
-            throw new CompilationNotFoundException(String.format("Подборки с id = %s не существует.", compId));
-        }
         compilationRepository.deleteById(compId);
     }
 

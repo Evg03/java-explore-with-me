@@ -6,14 +6,12 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.exception.UserNotFoundException;
 import ru.yandex.practicum.user.dto.NewUserRequest;
 import ru.yandex.practicum.user.dto.UserDto;
 import ru.yandex.practicum.user.model.User;
 import ru.yandex.practicum.user.storage.UserRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -47,10 +45,6 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void deleteUser(int userId) {
-        Optional<User> user = userRepository.findById(userId);
-        if (user.isEmpty()) {
-            throw new UserNotFoundException(String.format("Пользователя с id = %s не существует.", userId));
-        }
         userRepository.deleteById(userId);
     }
 
